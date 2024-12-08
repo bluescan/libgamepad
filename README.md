@@ -3,6 +3,14 @@
 
 C++11 library for crossplatform gamepad hooking. Supports DirectInput, Xinput and the Linux joystick API
 
+## Changes in Fork
+
+Staying compliant with LGPL since using this in an ISC-licensed (similar to MIT) project. Changes include:
+* Disable linking with DirectInput on Windows to reduce static library size.
+* Turn on optimizations in RELEASE.
+* Remove the in-library debug output.
+The changes aren't clean enough to warrant a PR, so made the fork to keep them publicly available.
+
 ## Compiling
 ```
 $ git clone https://github.com/univrsal/libgamepad
