@@ -4,7 +4,9 @@ option(GAMEPAD_ENABLE_TESTS "Compile test binary (default: ON)" ON)
 option(GAMEPAD_ENABLE_STATIC "Static library (default: OFF)" ON)
 option(GAMEPAD_ENABLE_SHARED "Shared library (default: ON)" OFF)
 option(GAMEPAD_ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
-option(GAMEPAD_ENABLE_INSTALL "Register files for install target (default: ON)" ON)
+# BSD
+#option(GAMEPAD_ENABLE_INSTALL "Register files for install target (default: ON)" ON)
+option(GAMEPAD_ENABLE_INSTALL "Register files for install target (default: OFF)" OFF)
 
 project(libgamepad VERSION 1.0.0 LANGUAGES CXX)
 
@@ -34,6 +36,25 @@ target_include_directories(gamepad
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# BSD
+# Set compiler option flags based on specific compiler and configuration.
+target_compile_options(
+	gamepad
+	PRIVATE
+		# MSVC compiler. Warning /utf-8 is needed for MSVC to support UTF-8 source files. Basically u8 string literals won't work without it.
+		$<$<CXX_COMPILER_ID:MSVC>:/utf-8 /GS /Gy /Zc:wchar_t /Gm- /Zc:inline /fp:precise /WX- /Zc:forScope /Gd /FC>
+
+		# Clang and GNU.
+		$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-format-security>
+
+		$<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-O0>
+		$<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:MSVC>>:/Od>
+		$<$<AND:$<CONFIG:Release>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-O2>
+		$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>:/O2>
+)
+target_compile_features(gamepad PRIVATE cxx_std_20)
+# BSD
+
 if (GAMEPAD_ENABLE_INSTALL)
     include(GNUInstallDirs)
 endif()
@@ -52,18 +73,19 @@ elseif (APPLE)
 elseif(WIN32)
     target_sources(gamepad PRIVATE
         ./src/windows/hook-xinput.cpp
-        ./src/windows/hook-dinput.cpp
-        ./src/windows/binding-dinput.cpp
+		# BSD ./src/windows/hook-dinput.cpp
+		# BSD ./src/windows/binding-dinput.cpp
         ./src/windows/binding-xinput.cpp
-        ./src/windows/device-dinput.cpp
-        ./src/windows/device-dinput.hpp
+ 		# BSD ./src/windows/device-dinput.cpp
+ 		# BSD ./src/windows/device-dinput.hpp
         ./src/windows/device-xinput.cpp
         ./src/windows/device-xinput.hpp
         )
     add_compile_definitions(UNICODE _UNICODE)
     target_link_libraries(gamepad
-        dinput8
-        dxguid)
+		# BSD dinput8
+		# BSD dxguid
+	)
 endif()
 
 if (GAMEPAD_ENABLE_SHARED)
@@ -74,8 +96,9 @@ if (GAMEPAD_ENABLE_SHARED)
         target_link_libraries (gamepad_shared ${CMAKE_THREAD_LIBS_INIT})
     elseif (MSVC)
         target_link_libraries(gamepad_shared
-            dinput8
-            dxguid)
+            # BSD dinput8
+            # BSD dxguid
+		)
     endif()
 
     if (GAMEPAD_ENABLE_INSTALL)
@@ -91,8 +114,9 @@ if (GAMEPAD_ENABLE_STATIC)
         target_link_libraries (gamepad_static ${CMAKE_THREAD_LIBS_INIT})
     elseif (MSVC)
         target_link_libraries(gamepad_static
-            dinput8
-            dxguid)
+			# BSD dinput8
+			# BSD dxguid
+		)
     endif()
 
 
@@ -106,14 +130,14 @@ if (GAMEPAD_ENABLE_SHARED OR GAMEPAD_ENABLE_STATIC)
         install(FILES ./include/libgamepad.hpp
             DESTINATION include)
         install(FILES ./include/gamepad/binding.hpp
-            ./include/gamepad/binding-dinput.hpp
+			# BSD ./include/gamepad/binding-dinput.hpp
             ./include/gamepad/binding-xinput.hpp
-            ./include/gamepad/binding-linux.hpp
+			# BSD ./include/gamepad/binding-linux.hpp
             ./include/gamepad/config.h
             ./include/gamepad/device.hpp
             ./include/gamepad/hook.hpp
-            ./include/gamepad/hook-dinput.hpp
-            ./include/gamepad/hook-linux.hpp
+			# BSD ./include/gamepad/hook-dinput.hpp
+			# BSD ./include/gamepad/hook-linux.hpp
             ./include/gamepad/hook-xinput.hpp
             ./include/gamepad/log.hpp
             DESTINATION include/gamepad)

@@ -61,10 +61,14 @@ namespace cfg {
                 }
                 result = true;
             } else {
-                gerr("Expected json array when loading gamepad bindings");
+				// Begin Bluescan Divergence
+                // gerr("Expected json array when loading gamepad bindings");
+				// End Bluescan Divergence
             }
         } else {
-            gerr("Expected json object when loading gamepad binding");
+			// Begin Bluescan Divergence
+            // gerr("Expected json object when loading gamepad binding");
+			// End Bluescan Divergence
         }
         return result;
     }
@@ -94,7 +98,9 @@ namespace cfg {
         if (err.empty()) {
             return load(j);
         }
-        gerr("Couldn't load JSON: %s", err.c_str());
+		// Begin Bluescan Divergence
+        // gerr("Couldn't load JSON: %s", err.c_str());
+		// End Bluescan Divergence
         return false;
     }
 

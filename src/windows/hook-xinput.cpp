@@ -18,9 +18,36 @@
 
 #include "device-xinput.hpp"
 #include <gamepad/binding-xinput.hpp>
-#include <gamepad/hook-dinput.hpp> /* for utf8 conversion */
+// Begin Bluescan Divergence
+// #include <gamepad/hook-dinput.hpp> /* for utf8 conversion */
+// End Bluescan Divergence
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/log.hpp>
+
+#include <string>
+
+// Begin Bluescan Divergence
+namespace gamepad {
+namespace util {
+    inline std::string wchar_to_utf8(const std::wstring& wstr)
+    {
+        if (wstr.empty())
+            return "";
+        std::string result;
+        int char_count = 0;
+        if ((char_count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, 0, 0) - 1) > 0) {
+            char* buf = new char[int(char_count + 1)];
+            if (buf) {
+                WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, buf, char_count, 0, 0);
+                buf[char_count] = '\0';
+                result = buf;
+            }
+        }
+        return result;
+    }
+}
+}
+// End Bluescan Divergence
 
 using namespace json11;
 
@@ -90,24 +117,36 @@ bool hook_xinput::start()
 
     TCHAR sys_dir[MAX_PATH];
     GetSystemDirectory(sys_dir, sizeof(sys_dir));
-    std::wstring dll = L"\\xinput1_3.dll";
+	// Begin Bluescan Divergence
+	// std::wstring dll = L"\\xinput1_3.dll";
+    std::wstring dll = L"\\xinput1_4.dll";
+	// End Bluescan Divergence
+
     dll = sys_dir + dll;
 
-    ginfo("Loading Xinput from %s", util::wchar_to_utf8(dll).c_str());
+	// Begin Bluescan Divergence
+    // ginfo("Loading Xinput from %s", util::wchar_to_utf8(dll).c_str());
+	// End Bluescan Divergence
 
     m_xinput = LoadLibrary(dll.c_str());
 
     if (m_xinput) {
         m_xinput_refresh = reinterpret_cast<xinput_refresh_t>(GetProcAddress(m_xinput, LPCSTR(100)));
 
-        if (m_xinput_refresh) {
-            ginfo("Xinput 1.3 loaded successfuly");
-        } else {
-            gerr("Loading Xinput failed: %lu", GetLastError());
-        }
+		// Begin Bluescan Divergence
+        // if (m_xinput_refresh) {
+        //    ginfo("Xinput 1.4 loaded successfuly");
+        // } else {
+        //    gerr("Loading Xinput failed: %lu", GetLastError());
+        // }
+		// End Bluescan Divergence
+
     } else {
-        auto code = GetLastError();
-        gerr("Loading Xinput failed: %lu", GetLastError());
+		// Begin Bluescan Divergence
+        // auto code = GetLastError();
+        // gerr("Loading Xinput failed: %lu", GetLastError());
+		// End Bluescan Divergence
+
         return false;
     }
     return hook::start();

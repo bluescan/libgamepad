@@ -47,6 +47,10 @@ int main()
     SetConsoleCtrlHandler(handler, TRUE);
 #endif
 
+	// Begin Bluescan Divergence
+    ginfo("LIBGAMEPAD Test Start");
+	// End Bluescan Divergence
+	
     auto h = gamepad::hook::make();
     h->set_plug_and_play(true, gamepad::ms(1000));
     h->set_sleep_time(gamepad::ms(5)); // just std::chrono::milliseconds

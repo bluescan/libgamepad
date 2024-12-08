@@ -19,7 +19,9 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
-#include <gamepad/hook-dinput.hpp>
+// Begin Bluescan Divergence
+// #include <gamepad/hook-dinput.hpp>
+// End Bluescan Divergence
 #include <gamepad/hook-linux.hpp>
 #include <gamepad/hook-xinput.hpp>
 #include <gamepad/hook.hpp>
@@ -58,7 +60,10 @@ void default_hook_thread(hook* h)
     auto sleep_time = h->m_thread_sleep;
 
     h->get_mutex()->lock();
-    ginfo("Hook thread started");
+	
+	// Begin Bluescan Divergence
+    // ginfo("Hook thread started");
+	// End Bluescan Divergence
     h->get_mutex()->unlock();
 
     auto plug_n_play_wait = ns(0);
@@ -87,7 +92,10 @@ void default_hook_thread(hook* h)
         }
         this_thread::sleep_for(sleep_time);
     }
-    ginfo("Hook thread ended");
+
+	// Begin Bluescan Divergence	
+    // ginfo("Hook thread ended");
+	// End Bluescan Divergence
 }
 
 void hook::on_bind(Json::object&, uint16_t, uint16_t, int16_t, bool)
@@ -134,7 +142,9 @@ std::shared_ptr<cfg::binding> hook::make_native_binding(const std::string& json)
         auto j = Json::parse(json, err);
         if (err.empty())
             return make_native_binding(j);
-        gerr("Failed to make gamepad binding from json: %s", err.c_str());
+		// Begin Bluescan Divergence	
+        // gerr("Failed to make gamepad binding from json: %s", err.c_str());
+		// End Bluescan Divergence
     }
     return nullptr;
 }
@@ -176,9 +186,16 @@ std::shared_ptr<cfg::binding> hook::get_binding_for_device(const std::string& id
 std::shared_ptr<hook> hook::make(uint16_t flags)
 {
 #if LGP_WINDOWS
+// Begin Bluescan Divergence
+#if 0
     if (flags & hook_type::XINPUT || flags & hook_type::NATIVE_DEFAULT)
         return std::make_shared<hook_xinput>();
     return std::make_shared<hook_dinput>();
+#else
+    return std::make_shared<hook_xinput>();
+#endif
+// End Bluescan Divergence
+
 #elif LGP_LINUX
     return std::make_shared<hook_linux>(flags);
 #else
@@ -209,7 +226,9 @@ void hook::close_bindings()
         /* One reference in the bindings list
          * and one for this for loop */
         if (bind.use_count() > 2) {
-            gerr("Gamepad binding '%s' is still in use! (Ref count %li)", bind->get_name().c_str(), bind.use_count());
+			// Begin Bluescan Divergence
+            // gerr("Gamepad binding '%s' is still in use! (Ref count %li)", bind->get_name().c_str(), bind.use_count());
+			// End Bluescan Divergence
         }
     }
 
@@ -224,8 +243,11 @@ bool hook::start()
 
     query_devices();
 
-    if (m_devices.empty())
-        ginfo("No Devices detected. Waiting for connection...");
+	// Begin Bluescan Divergence
+    // if (m_devices.empty())
+    //    ginfo("No Devices detected. Waiting for connection...");
+	// End Bluescan Divergence	
+
     m_running = true;
     m_hook_thread = thread(default_hook_thread, this);
     return true;
@@ -252,7 +274,9 @@ bool hook::save_bindings(const std::string& path)
             out.close();
             return true;
         }
-        gerr("Can't write gamepad bindings to '%s'", path.c_str());
+		// Begin Bluescan Divergence
+        // gerr("Can't write gamepad bindings to '%s'", path.c_str());
+		// End Bluescan Divergence
     }
     return false;
 }
@@ -291,9 +315,13 @@ bool hook::load_bindings(const std::string& path)
         if (load_bindings(j)) {
             return true;
         }
-        gerr("Couldn't parse json when loading bindings from '%s': %s", path.c_str(), err.c_str());
+		// Begin Bluescan Divergence
+        // gerr("Couldn't parse json when loading bindings from '%s': %s", path.c_str(), err.c_str());
+		// End Bluescan Divergence
     }
-    gerr("Couldn't read bindings from '%s'", path.c_str());
+	// Begin Bluescan Divergence
+    // gerr("Couldn't read bindings from '%s'", path.c_str());
+	// End Bluescan Divergence
     return false;
 }
 
@@ -376,7 +404,10 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
     dv->set_axis_deadzone(axis::RIGHT_STICK_X, 500);
     dv->set_axis_deadzone(axis::RIGHT_STICK_Y, 500);
 
-    ginfo("Starting config creation wizard");
+	// Begin Bluescan Divergence
+    // ginfo("Starting config creation wizard");
+	// End Bluescan Divergence
+
     auto sleep_time = get_sleep_time();
     uint64_t last_key_input = 0;
     bool running = true;
@@ -397,9 +428,12 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
     auto binder = [&](const char* prompt, bool axis, const input_event* e, uint16_t* last,
                       const vector<tuple<string, uint16_t>>& prompts) {
         for (const auto& p : prompts) {
-            ginfo("Please %s %s on your gamepad or press enter on your keyboard "
-                  "to skip this bind.",
-                prompt, get<0>(p).c_str());
+			// Begin Bluescan Divergence
+            // ginfo("Please %s %s on your gamepad or press enter on your keyboard "
+            //      "to skip this bind.",
+            //    prompt, get<0>(p).c_str());
+			// End Bluescan Divergence
+
             bool success = false;
             for (;;) {
                 m_mutex.lock();
@@ -413,7 +447,9 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
 
                 key_thread_mutex.lock();
                 if (ms_ticks() - last_key_input < 100) {
-                    ginfo("Received key input, skipping bind...");
+					// Begin Bluescan Divergence
+                    // ginfo("Received key input, skipping bind...");
+					// End Bluescan Divergence
                     last_key_input = 0;
                     key_thread_mutex.unlock();
                     break;
@@ -425,7 +461,9 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
             if (!success)
                 continue;
 
-            ginfo("Received input with id %i", *last);
+			// Begin Bluescan Divergence
+            // ginfo("Received input with id %i", *last);
+			// End Bluescan Divergence
 
             Json::object bind = Json::object { { "is_axis", axis }, { "from", *last }, { "to", get<1>(p) } };
             on_bind(bind, *last, get<1>(p), e->value, axis);
@@ -447,7 +485,11 @@ void hook::make_xbox_config(const std::shared_ptr<gamepad::device>& dv, Json& ou
     key_thread_mutex.lock();
     running = false;
     key_thread_mutex.unlock();
-    ginfo("Done. Press Enter to print config json.");
+
+	// Begin Bluescan Divergence
+    // ginfo("Done. Press Enter to print config json.");
+	// End Bluescan Divergence
+
     key_thread.join();
 }
 
