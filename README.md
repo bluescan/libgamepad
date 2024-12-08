@@ -10,6 +10,7 @@ Staying compliant with LGPL since using this in an ISC-licensed (similar to MIT)
 * Turn on optimizations in RELEASE.
 * Remove the in-library debug output.
 * Use xinput 1.4 instead of 1.3
+  
 The changes aren't clean enough to warrant a PR, so made the fork to keep them publicly available.
 
 ## Compiling
