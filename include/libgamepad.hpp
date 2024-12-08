@@ -18,14 +18,18 @@
 
 #pragma once
 
-#include "gamepad/binding-dinput.hpp"
-#include "gamepad/binding-linux.hpp"
+// Begin Bluescan Divergence
+//#include "gamepad/binding-dinput.hpp"
+//#include "gamepad/binding-linux.hpp"
+// End Bluescan Divergence
 #include "gamepad/binding-xinput.hpp"
 #include "gamepad/binding.hpp"
 #include "gamepad/config.h"
 #include "gamepad/device.hpp"
-#include "gamepad/hook-dinput.hpp"
-#include "gamepad/hook-linux.hpp"
+// Begin Bluescan Divergence
+//#include "gamepad/hook-dinput.hpp"
+//#include "gamepad/hook-linux.hpp"
+// End Bluescan Divergence
 #include "gamepad/hook-xinput.hpp"
 #include "gamepad/hook.hpp"
 #include "gamepad/log.hpp"
