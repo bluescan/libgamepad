@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION "3.16.0")  # BSD Needed for MSVC_RUNTIME_LIBRARY
 
 option(GAMEPAD_ENABLE_TESTS "Compile test binary (default: ON)" ON)
-option(GAMEPAD_ENABLE_STATIC "Static library (default: OFF)" ON)
-option(GAMEPAD_ENABLE_SHARED "Shared library (default: ON)" OFF)
+option(GAMEPAD_ENABLE_STATIC "Static library (default: ON)" ON)		# BSD Static defaults ON.
+option(GAMEPAD_ENABLE_SHARED "Shared library (default: OFF)" OFF)
 option(GAMEPAD_ENABLE_JSON "Provide interface to load and save with json11 (default: ON)" ON)
 # BSD
 #option(GAMEPAD_ENABLE_INSTALL "Register files for install target (default: ON)" ON)
@@ -36,13 +36,13 @@ target_include_directories(gamepad
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# BSD
+# BSD Start
 # Set compiler option flags based on specific compiler and configuration.
 target_compile_options(
 	gamepad
 	PRIVATE
 		# MSVC compiler. Warning /utf-8 is needed for MSVC to support UTF-8 source files. Basically u8 string literals won't work without it.
-		$<$<CXX_COMPILER_ID:MSVC>:/utf-8 /GS /Gy /Zc:wchar_t /Gm- /Zc:inline /fp:precise /WX- /Zc:forScope /Gd /FC>
+		$<$<CXX_COMPILER_ID:MSVC>:/utf-8 /W2 /GS /Gy /Zc:wchar_t /Gm- /Zc:inline /fp:precise /WX- /Zc:forScope /Gd /FC>
 
 		# Clang and GNU.
 		$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-format-security>
@@ -53,7 +53,7 @@ target_compile_options(
 		$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>:/O2>
 )
 target_compile_features(gamepad PRIVATE cxx_std_20)
-# BSD
+# BSD End
 
 if (GAMEPAD_ENABLE_INSTALL)
     include(GNUInstallDirs)
@@ -108,7 +108,15 @@ endif()
 
 if (GAMEPAD_ENABLE_STATIC)
     add_library(gamepad_static STATIC $<TARGET_OBJECTS:gamepad>)
-    set_target_properties(gamepad_static PROPERTIES OUTPUT_NAME "gamepad")
+    set_target_properties(gamepad_static
+		PROPERTIES
+		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"	# BSD Use multithreaded or multithreaded-debug runtime on windows.
+		OUTPUT_NAME "gamepad"
+	)
+
+	set_target_properties("gamepad" PROPERTIES
+		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"	# BSD Use multithreaded or multithreaded-debug runtime on windows.
+	)
 
     if (UNIX)
         target_link_libraries (gamepad_static ${CMAKE_THREAD_LIBS_INIT})
